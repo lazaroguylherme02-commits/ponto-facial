@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ponto Eletrônico - Reconhecimento Facial</title>
-    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/face-api.js/0.22.2/face-api.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/face-api.js/0.22.2/face-api.min.js"></script>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -80,91 +80,81 @@
 </div>
 
 <script>
-    const video = document.getElementById('video');
-    const statusLabel = document.getElementById('statusLabel');
-    const logContainer = document.getElementById('logContainer');
+    // CORREÇÃO: Só executa o código após a página inteira carregar
+    window.onload = function() {
+        const video = document.getElementById('video');
+        const statusLabel = document.getElementById('statusLabel');
+        const logContainer = document.getElementById('logContainer');
 
-    // 1. Carregar os modelos da IA e iniciar a câmera (Links corrigidos)
-    Promise.all([
-        faceapi.nets.tinyFaceDetector.loadFromUri('https://justadudewhohacks.github.io/face-api.js/models'),
-        faceapi.nets.faceLandmark68Net.loadFromUri('https://justadudewhohacks.github.io/face-api.js/models'),
-        faceapi.nets.faceRecognitionNet.loadFromUri('https://justadudewhohacks.github.io/face-api.js/models'),
-        faceapi.nets.ssdMobilenetv1.loadFromUri('https://justadudewhohacks.github.io/face-api.js/models')
-    ]).then(startVideo).catch(err => {
-        statusLabel.innerText = "Erro ao baixar os arquivos da IA.";
-        console.error(err);
-    });
+        const modelUrl = 'https://cdn.jsdelivr.net/gh/justadudewhohacks/face-api.js@master/weights';
 
-    function startVideo() {
-        statusLabel.innerText = "Ligando a câmera...";
-        navigator.mediaDevices.getUserMedia({ video: {} })
-            .then(stream => {
-                video.srcObject = stream;
-                statusLabel.innerText = "Posicione o rosto em frente ao tablet";
-            })
-            .catch(err => {
-                statusLabel.innerText = "Erro ao acessar a câmera. Verifique as permissões do navegador.";
-                console.error(err);
-            });
-    }
+        Promise.all([
+            faceapi.nets.tinyFaceDetector.loadFromUri(modelUrl),
+            faceapi.nets.faceLandmark68Net.loadFromUri(modelUrl),
+            faceapi.nets.faceRecognitionNet.loadFromUri(modelUrl),
+            faceapi.nets.ssdMobilenetv1.loadFromUri(modelUrl)
+        ]).then(startVideo).catch(err => {
+            statusLabel.innerText = "Erro ao baixar IA. Veja o console (F12).";
+            statusLabel.style.color = "red";
+            console.error("Erro detalhado:", err);
+        });
 
-    // 2. Mapeamento de funcionários (Corrigido aspas)
-    async function loadLabeledImages() {
-        const labels = ['Funcionario_1', 'Funcionario_2']; 
-        return Promise.all(
-            labels.map(async label => {
-                const descriptions = [];
-                const img = await faceapi.fetchImage(`https://sua-api.com/fotos-funcionarios/${label}.jpg`);
-                const detections = await faceapi.detectSingleFace(img).withFaceLandmarks().withFaceDescriptor();
-                descriptions.push(detections.descriptor);
-                return new faceapi.LabeledFaceDescriptors(label, descriptions);
-            })
-        );
-    }
+        function startVideo() {
+            statusLabel.innerText = "Ligando a câmera...";
+            navigator.mediaDevices.getUserMedia({ video: {} })
+                .then(stream => {
+                    video.srcObject = stream;
+                    statusLabel.innerText = "Posicione o rosto em frente ao tablet";
+                })
+                .catch(err => {
+                    statusLabel.innerText = "Permita o uso da câmera no navegador!";
+                    statusLabel.style.color = "red";
+                    console.error("Erro de câmera:", err);
+                });
+        }
 
-    // 3. Processamento em tempo real (Corrigido face-api para faceapi)
-    video.addEventListener('play', async () => {
-        const canvas = faceapi.createCanvasFromMedia(video);
-        document.querySelector('.video-container').append(canvas);
-        const displaySize = { width: video.clientWidth, height: video.clientHeight };
-        faceapi.matchDimensions(canvas, displaySize);
+        video.addEventListener('play', async () => {
+            const canvas = faceapi.createCanvasFromMedia(video);
+            document.querySelector('.video-container').append(canvas);
+            const displaySize = { width: video.clientWidth, height: video.clientHeight };
+            faceapi.matchDimensions(canvas, displaySize);
 
-        let ultimoRegistro = 0;
+            let ultimoRegistro = 0;
 
-        setInterval(async () => {
-            const detections = await faceapi.detectAllFaces(video, new faceapi.TinyFaceDetectorOptions()).withFaceLandmarks().withFaceDescriptors();
-            const resizedDetections = faceapi.resizeResults(detections, displaySize);
-            canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
-            faceapi.draw.drawDetections(canvas, resizedDetections);
+            setInterval(async () => {
+                const detections = await faceapi.detectAllFaces(video, new faceapi.TinyFaceDetectorOptions()).withFaceLandmarks().withFaceDescriptors();
+                const resizedDetections = faceapi.resizeResults(detections, displaySize);
+                canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
+                faceapi.draw.drawDetections(canvas, resizedDetections);
 
-            if (detections.length > 0) {
-                const agora = new Date().getTime();
-                if (agora - ultimoRegistro > 5000) { 
-                    registrarPonto("Rosto Detectado");
-                    ultimoRegistro = agora;
+                if (detections.length > 0) {
+                    const agora = new Date().getTime();
+                    if (agora - ultimoRegistro > 5000) { 
+                        registrarPonto("Rosto Detectado");
+                        ultimoRegistro = agora;
+                    }
                 }
-            }
-        }, 1000);
-    });
+            }, 1000);
+        });
 
-    // Função de registro corrigida
-    function registrarPonto(nome) {
-        const agora = new Date();
-        const horaFormatada = agora.toLocaleTimeString('pt-BR');
-        
-        statusLabel.innerText = `Ponto batido: ${nome}!`;
-        statusLabel.style.color = "green";
-        
-        const item = document.createElement('div');
-        item.classList.add('log-item');
-        item.innerHTML = `✅ <strong>${nome}</strong> - ${horaFormatada}`;
-        logContainer.insertBefore(item, logContainer.firstChild);
+        function registrarPonto(nome) {
+            const agora = new Date();
+            const horaFormatada = agora.toLocaleTimeString('pt-BR');
+            
+            statusLabel.innerText = `Ponto batido: ${nome}!`;
+            statusLabel.style.color = "green";
+            
+            const item = document.createElement('div');
+            item.classList.add('log-item');
+            item.innerHTML = `✅ <strong>${nome}</strong> - ${horaFormatada}`;
+            logContainer.insertBefore(item, logContainer.firstChild);
 
-        setTimeout(() => {
-            statusLabel.innerText = "Posicione o rosto em frente ao tablet";
-            statusLabel.style.color = "#666";
-        }, 3000);
-    }
+            setTimeout(() => {
+                statusLabel.innerText = "Posicione o rosto em frente ao tablet";
+                statusLabel.style.color = "#666";
+            }, 3000);
+        }
+    };
 </script>
 
 </body>
