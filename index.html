@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ponto Eletrônico - Reconhecimento Facial</title>
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/face-api.js/0.22.2/face-api.min.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0f2f5;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            text-align: center;
+            width: 90%;
+            max-width: 500px;
+        }
+        h1 { color: #333; margin-bottom: 5px; }
+        .status {
+            color: #666;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+        .video-container {
+            position: relative;
+            width: 100%;
+            max-width: 400px;
+            margin: 0 auto;
+            border-radius: 10px;
+            overflow: hidden;
+            background: #000;
+        }
+        video {
+            width: 100%;
+            display: block;
+        }
+        canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+        .log-container {
+            margin-top: 20px;
+            max-height: 150px;
+            overflow-y: auto;
+            border-top: 1px solid #eee;
+            padding-top: 10px;
+            text-align: left;
+            font-size: 14px;
+        }
+        .log-item {
+            padding: 5px 0;
+            border-bottom: 1px dashed #f0f0f0;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Ponto Facial</h1>
+    <div class="status" id="statusLabel">Carregando inteligência artificial...</div>
+    
+    <div class="video-container">
+        <video id="video" autoplay muted playsinline></video>
+    </div>
+
+    <div class="log-container" id="logContainer">
+        <strong>Últimos Registros (Simulado):</strong>
+    </div>
+</div>
+
+<script>
+    const video = document.getElementById('video');
+    const statusLabel = document.getElementById('statusLabel');
+    const logContainer = document.getElementById('logContainer');
+
+    // 1. Carregar os modelos da IA e iniciar a câmera (Links corrigidos)
+    Promise.all([
+        faceapi.nets.tinyFaceDetector.loadFromUri('https://justadudewhohacks.github.io/face-api.js/models'),
+        faceapi.nets.faceLandmark68Net.loadFromUri('https://justadudewhohacks.github.io/face-api.js/models'),
+        faceapi.nets.faceRecognitionNet.loadFromUri('https://justadudewhohacks.github.io/face-api.js/models'),
+        faceapi.nets.ssdMobilenetv1.loadFromUri('https://justadudewhohacks.github.io/face-api.js/models')
+    ]).then(startVideo).catch(err => {
+        statusLabel.innerText = "Erro ao baixar os arquivos da IA.";
+        console.error(err);
+    });
+
+    function startVideo() {
+        statusLabel.innerText = "Ligando a câmera...";
+        navigator.mediaDevices.getUserMedia({ video: {} })
+            .then(stream => {
+                video.srcObject = stream;
+                statusLabel.innerText = "Posicione o rosto em frente ao tablet";
+            })
+            .catch(err => {
+                statusLabel.innerText = "Erro ao acessar a câmera. Verifique as permissões do navegador.";
+                console.error(err);
+            });
+    }
+
+    // 2. Mapeamento de funcionários (Corrigido aspas)
+    async function loadLabeledImages() {
+        const labels = ['Funcionario_1', 'Funcionario_2']; 
+        return Promise.all(
+            labels.map(async label => {
+                const descriptions = [];
+                const img = await faceapi.fetchImage(`https://sua-api.com/fotos-funcionarios/${label}.jpg`);
+                const detections = await faceapi.detectSingleFace(img).withFaceLandmarks().withFaceDescriptor();
+                descriptions.push(detections.descriptor);
+                return new faceapi.LabeledFaceDescriptors(label, descriptions);
+            })
+        );
+    }
+
+    // 3. Processamento em tempo real (Corrigido face-api para faceapi)
+    video.addEventListener('play', async () => {
+        const canvas = faceapi.createCanvasFromMedia(video);
+        document.querySelector('.video-container').append(canvas);
+        const displaySize = { width: video.clientWidth, height: video.clientHeight };
+        faceapi.matchDimensions(canvas, displaySize);
+
+        let ultimoRegistro = 0;
+
+        setInterval(async () => {
+            const detections = await faceapi.detectAllFaces(video, new faceapi.TinyFaceDetectorOptions()).withFaceLandmarks().withFaceDescriptors();
+            const resizedDetections = faceapi.resizeResults(detections, displaySize);
+            canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
+            faceapi.draw.drawDetections(canvas, resizedDetections);
+
+            if (detections.length > 0) {
+                const agora = new Date().getTime();
+                if (agora - ultimoRegistro > 5000) { 
+                    registrarPonto("Rosto Detectado");
+                    ultimoRegistro = agora;
+                }
+            }
+        }, 1000);
+    });
+
+    // Função de registro corrigida
+    function registrarPonto(nome) {
+        const agora = new Date();
+        const horaFormatada = agora.toLocaleTimeString('pt-BR');
+        
+        statusLabel.innerText = `Ponto batido: ${nome}!`;
+        statusLabel.style.color = "green";
+        
+        const item = document.createElement('div');
+        item.classList.add('log-item');
+        item.innerHTML = `✅ <strong>${nome}</strong> - ${horaFormatada}`;
+        logContainer.insertBefore(item, logContainer.firstChild);
+
+        setTimeout(() => {
+            statusLabel.innerText = "Posicione o rosto em frente ao tablet";
+            statusLabel.style.color = "#666";
+        }, 3000);
+    }
+</script>
+
+</body>
+</html>
