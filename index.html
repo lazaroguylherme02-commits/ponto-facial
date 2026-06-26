@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Ponto Eletrônico - ebdi</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -12,17 +12,24 @@
     <script src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
     
     <style>
+        /* Aplicação Completa do Manual de Marca EBDI */
         :root {
-            --ebdi-blue: #003153;
-            --ebdi-lightblue: #1BA0CD;
-            --ebdi-cyan: #00E4FF;
-            --ebdi-gold: #D3B574;
+            --ebdi-bg: #161616;         /* Escuro Principal */
+            --ebdi-blue: #003153;       /* Azul Escuro */
+            --ebdi-lightblue: #1BA0CD;  /* Azul Claro */
+            --ebdi-cyan: #00E4FF;       /* Ciano */
+            --ebdi-gold: #D3B574;       /* Ouro */
             --ebdi-white: #FFFFFF;
+        }
+
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
         }
 
         body { 
             font-family: 'Montserrat', sans-serif; 
-            background-color: var(--ebdi-blue); 
+            background-color: var(--ebdi-bg); 
             display: flex; 
             flex-direction: column; 
             align-items: center; 
@@ -30,111 +37,166 @@
             height: 100vh; 
             margin: 0; 
             color: var(--ebdi-white);
+            overflow: hidden; /* Trava rolagem no tablet */
+            padding: 20px;
         }
 
-        .container { 
-            background: rgba(0, 0, 0, 0.25); 
-            padding: 40px 30px; 
-            border-radius: 20px; 
-            box-shadow: 0 15px 35px rgba(0,0,0,0.3); 
+        .totem-card { 
+            background: linear-gradient(135deg, var(--ebdi-blue) 0%, #001f35 100%);
+            padding: 35px; 
+            border-radius: 24px; 
+            box-shadow: 0 20px 50px rgba(0,0,0,0.6); 
             text-align: center; 
-            width: 95%; 
-            max-width: 800px; 
-            border-top: 5px solid var(--ebdi-cyan);
-            border-bottom: 1px solid rgba(255,255,255,0.1);
+            width: 100%; 
+            max-width: 500px; /* Largura ideal para tablets em pé ou deitados */
+            height: auto;
+            max-height: 90vh;
+            border: 2px solid rgba(255, 255, 255, 0.05);
+            border-top: 6px solid var(--ebdi-cyan);
             position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .logo-container {
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 15px;
         }
 
         .logo-ebdi {
-            max-width: 200px; 
-            margin-bottom: 20px;
-            display: block;
-            margin-left: auto;
-            margin-right: auto;
+            max-height: 100%;
+            max-width: 220px; 
+            object-fit: contain;
+            filter: drop-shadow(0 2px 8px rgba(0,228,255,0.2));
         }
+
+        /* Texto substituto caso não ache a imagem da logo */
+        .logo-fallback {
+            font-size: 1.8rem;
+            font-weight: 700;
+            letter-spacing: 2px;
+            color: var(--ebdi-white);
+        }
+        .logo-fallback span { color: var(--ebdi-cyan); }
 
         .status { 
             color: var(--ebdi-gold); 
-            margin-bottom: 25px; 
+            margin-bottom: 20px; 
             font-weight: 600; 
-            font-size: 1.2rem;
+            font-size: 1.15rem;
+            min-height: 28px; /* Evita que o layout dance quando o texto muda */
+            letter-spacing: 0.5px;
         }
 
+        /* MUDANÇA: CONTAINER DA CÂMERA COMPACTO E QUADRADO */
         .video-container { 
             position: relative; 
-            width: 100%; 
-            max-width: 480px; 
-            margin: 0 auto; 
-            border-radius: 15px; 
+            width: 320px; 
+            height: 320px; /* Força proporção idêntica de altura */
+            margin: 0 auto 20px auto; 
+            border-radius: 24px; /* Bordas arredondadas elegantes */
             overflow: hidden; 
             background: #000;
             border: 4px solid var(--ebdi-lightblue);
-            box-shadow: 0 10px 20px rgba(0,0,0,0.4);
+            box-shadow: 0 12px 24px rgba(0,0,0,0.5);
         }
 
-        video { width: 100%; display: block; transform: scaleX(-1); }
-        canvas { position: absolute; top: 0; left: 0; transform: scaleX(-1); }
+        video { 
+            width: 100%; 
+            height: 100%; 
+            object-fit: cover; /* Recorta as sobras da webcam para virar quadrado perfeito */
+            display: block; 
+            transform: scaleX(-1); 
+        }
+        
+        canvas { 
+            position: absolute; 
+            top: 0; 
+            left: 0; 
+            width: 100%;
+            height: 100%;
+            transform: scaleX(-1); 
+        }
         
         .log-container { 
-            margin-top: 30px; 
-            max-height: 180px; 
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 12px;
+            padding: 12px 15px;
+            max-height: 140px; 
             overflow-y: auto; 
-            border-top: 1px solid rgba(255, 255, 255, 0.1); 
-            padding-top: 15px; 
+            border: 1px solid rgba(255, 255, 255, 0.05); 
             text-align: left; 
-            font-size: 15px; 
+            font-size: 0.95rem; 
+        }
+
+        .log-title {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--ebdi-lightblue);
+            margin-bottom: 8px;
+            display: block;
+            font-weight: 700;
         }
 
         .log-item { 
-            padding: 10px 0; 
-            border-bottom: 1px dashed rgba(255, 255, 255, 0.1); 
+            padding: 8px 0; 
+            border-bottom: 1px dashed rgba(255, 255, 255, 0.08); 
         }
+        .log-item:last-child { border-bottom: none; }
 
-        .entrada { color: #4ade80; } 
-        .saida { color: #facc15; } 
+        .entrada { color: #4ade80; font-weight: 600; } 
+        .saida { color: #facc15; font-weight: 600; } 
 
+        /* FAIXA VERDE DE SUCESSO DO TOP_DOWN */
         .success-banner {
             position: absolute;
-            top: -20px; 
+            top: -100px; 
             left: 50%;
             transform: translateX(-50%);
-            background-color: #15803d; 
+            background: linear-gradient(135deg, #166534 0%, #15803d 100%);
             color: white;
-            padding: 15px 30px;
-            border-radius: 10px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            padding: 20px;
+            border-radius: 16px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.6);
             text-align: center;
-            font-size: 1.1rem;
-            font-weight: 600;
             opacity: 0;
             visibility: hidden;
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             z-index: 100;
-            width: 85%;
+            width: 90%;
             border: 2px solid #22c55e;
         }
 
         .success-banner.show {
-            top: 40px;
+            top: 25px;
             opacity: 1;
             visibility: visible;
         }
 
-        .success-banner .b-nome { font-size: 1.5rem; font-weight: 700; margin: 5px 0; display: block; }
-        .success-banner .b-data { font-size: 0.95rem; font-weight: 400; opacity: 0.9; }
+        .success-banner .b-tipo { font-size: 1rem; text-transform: uppercase; letter-spacing: 2px; font-weight: 600; color: #bbf7d0; }
+        .success-banner .b-nome { font-size: 1.6rem; font-weight: 700; margin: 6px 0; display: block; color: var(--ebdi-white); }
+        .success-banner .b-data { font-size: 0.95rem; font-weight: 400; color: #e2e8f0; }
 
     </style>
 </head>
 <body>
 
 <div id="successBanner" class="success-banner">
-    <span id="bannerTipo">✅ Entrada Registrada!</span>
-    <span class="b-nome" id="bannerNome">Nome</span>
-    <span class="b-data" id="bannerData">00/00/0000 às 00:00:00</span>
+    <div id="bannerTipo" class="b-tipo">✅ Entrada Registrada</div>
+    <span class="b-nome" id="bannerNome">Nome do Colaborador</span>
+    <div class="b-data" id="bannerData">00/00/0000 às 00:00:00</div>
 </div>
 
-<div class="container">
-    <img src="./logo.png" alt="Logo EBDI" class="logo-ebdi" onerror="this.style.display='none'">
+<div class="totem-card">
+    <div class="logo-container">
+        <img src="./logo.png" alt="EBDI" class="logo-ebdi" id="logoImg" onerror="this.style.display='none'; document.getElementById('logoFallback').style.display='block';">
+        <div id="logoFallback" class="logo-fallback" style="display: none;">ebdi<span>.</span></div>
+    </div>
     
     <div class="status" id="statusLabel">Carregando inteligência artificial...</div>
     
@@ -142,8 +204,9 @@
         <video id="video" autoplay muted playsinline></video>
     </div>
     
-    <div class="log-container" id="logContainer">
-        <strong>Últimos Registros da Unidade:</strong>
+    <div class="log-container">
+        <span class="log-title">Últimos Registros da Unidade</span>
+        <div id="logContainer"></div>
     </div>
 </div>
 
@@ -163,23 +226,21 @@
                 faceapi.nets.faceRecognitionNet.loadFromUri(modelUrl),
                 faceapi.nets.ssdMobilenetv1.loadFromUri(modelUrl)
             ]);
-            statusLabel.innerText = "Sincronizando fotos dos colaboradores...";
+            statusLabel.innerText = "Sincronizando banco facial...";
             
-            // Seu nome exatamente como está no arquivo (tudo minúsculo)
+            // Configuração da foto de teste
             const labels = ['lazaroguylherme']; 
             
             const labeledFaceDescriptors = await Promise.all(
                 labels.map(async label => {
-                    // CORREÇÃO: Agora puxando o arquivo com apenas UM .jpg
                     const imgUrl = `./${label}.jpg`; 
-                    
                     try {
                         const img = await faceapi.fetchImage(imgUrl);
                         const detections = await faceapi.detectSingleFace(img).withFaceLandmarks().withFaceDescriptor();
-                        if (!detections) throw new Error(`Rosto não identificado na foto de ${label}. Troque por uma foto mais nítida.`);
+                        if (!detections) throw new Error();
                         return new faceapi.LabeledFaceDescriptors(label, [detections.descriptor]);
                     } catch (e) {
-                        throw new Error(`Não foi possível baixar a foto exata. Falha no arquivo ${imgUrl}.`);
+                        throw new Error(`Erro ao ler arquivo da foto: ./${label}.jpg`);
                     }
                 })
             );
@@ -190,21 +251,20 @@
         } catch (err) {
             statusLabel.innerText = err.message;
             statusLabel.style.color = "#ef4444";
-            console.error(err);
         }
 
         function startVideo(faceMatcher) {
-            statusLabel.innerText = "Ligando a câmera...";
+            statusLabel.innerText = "Iniciando câmera do totem...";
             statusLabel.style.color = "var(--ebdi-gold)";
             
-            navigator.mediaDevices.getUserMedia({ video: {} })
+            navigator.mediaDevices.getUserMedia({ video: { width: 640, height: 480 } })
                 .then(stream => {
                     video.srcObject = stream;
                     statusLabel.innerText = "Posicione o rosto em frente ao tablet";
                     statusLabel.style.color = "var(--ebdi-cyan)";
                 })
                 .catch(err => {
-                    statusLabel.innerText = "Permita a câmera no navegador!";
+                    statusLabel.innerText = "Acesso à câmera bloqueado!";
                     statusLabel.style.color = "#ef4444";
                 });
 
@@ -213,6 +273,8 @@
             video.addEventListener('play', () => {
                 const canvas = faceapi.createCanvasFromMedia(video);
                 document.querySelector('.video-container').append(canvas);
+                
+                // Vincula o canvas ao tamanho exato quadrado do container
                 const displaySize = { width: video.clientWidth, height: video.clientHeight };
                 faceapi.matchDimensions(canvas, displaySize);
 
@@ -230,11 +292,10 @@
                         
                         results.forEach((result) => {
                             const nomeReconhecido = result.label;
-                            
                             if (nomeReconhecido !== 'unknown') {
                                 registrarPonto(nomeReconhecido);
                                 pondoEmEspera = true;
-                                setTimeout(() => { pondoEmEspera = false; }, 8000); 
+                                setTimeout(() => { pondoEmEspera = false; }, 7000); // Cooldown ajustado para 7s
                             }
                         });
                     }
@@ -258,29 +319,31 @@
                 tipoPonto = "Saída";
             }
             
-            document.getElementById('bannerTipo').innerHTML = tipoPonto === "Entrada" ? "✅ Entrada Registrada!" : "👋 Saída Registrada!";
+            // Atualiza a faixa suspensa verde
+            document.getElementById('bannerTipo').innerHTML = tipoPonto === "Entrada" ? "✅ Entrada Registrada" : "👋 Saída Registrada";
             
-            // Formatando o nome para aparecer bonitinho na tela (ex: Lázaro Guylherme em vez de lazaroguylherme)
             let nomeExibicao = nome;
             if (nome === 'lazaroguylherme') nomeExibicao = 'Lázaro Guylherme';
             
             document.getElementById('bannerNome').innerText = nomeExibicao;
             document.getElementById('bannerData').innerText = `${dataHoje} às ${horaFormatada}`;
             
-            const banner = document.getElementById('successBanner');
-            banner.classList.add('show');
+            // Animação da faixa descendo
+            successBanner.classList.add('show');
             statusLabel.style.opacity = '0'; 
 
+            // Insere na lista interna do totem
             const item = document.createElement('div');
             item.classList.add('log-item');
             const classeCor = tipoPonto === "Entrada" ? "entrada" : "saida";
-            item.innerHTML = `<span class="${classeCor}"><strong>[${tipoPonto}] ${nomeExibicao}</strong> - ${horaFormatada}</span>`;
+            item.innerHTML = `<span class="${classeCor}"><strong>[${tipoPonto}]</strong> ${nomeExibicao} — ${horaFormatada}</span>`;
             logContainer.insertBefore(item, logContainer.firstChild);
 
+            // Esconde a faixa após 4 segundos
             setTimeout(() => {
-                banner.classList.remove('show');
+                successBanner.classList.remove('show');
                 statusLabel.style.opacity = '1';
-            }, 4500);
+            }, 4000);
         }
     };
 </script>
