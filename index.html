@@ -22,7 +22,7 @@
 
         body { 
             font-family: 'Montserrat', sans-serif; 
-            background-color: var(--ebdi-blue); /* Fundo todo azul oficial */
+            background-color: var(--ebdi-blue); 
             display: flex; 
             flex-direction: column; 
             align-items: center; 
@@ -33,20 +33,20 @@
         }
 
         .container { 
-            background: rgba(0, 0, 0, 0.25); /* Fundo sutil escurecido para destacar do azul */
+            background: rgba(0, 0, 0, 0.25); 
             padding: 40px 30px; 
             border-radius: 20px; 
             box-shadow: 0 15px 35px rgba(0,0,0,0.3); 
             text-align: center; 
             width: 95%; 
-            max-width: 800px; /* Contêiner mais largo */
+            max-width: 800px; 
             border-top: 5px solid var(--ebdi-cyan);
             border-bottom: 1px solid rgba(255,255,255,0.1);
             position: relative;
         }
 
         .logo-ebdi {
-            max-width: 200px; /* Tamanho da logo */
+            max-width: 200px; 
             margin-bottom: 20px;
             display: block;
             margin-left: auto;
@@ -60,10 +60,11 @@
             font-size: 1.2rem;
         }
 
+        /* AJUSTE PARA CÂMERA MAIS QUADRADA */
         .video-container { 
             position: relative; 
             width: 100%; 
-            max-width: 650px; /* Câmera muito maior */
+            max-width: 480px; /* Reduzido de 650px para dar formato quadrado */
             margin: 0 auto; 
             border-radius: 15px; 
             overflow: hidden; 
@@ -165,12 +166,12 @@
             ]);
             statusLabel.innerText = "Sincronizando fotos dos colaboradores...";
             
-            // VERIFIQUE SE O NOME AQUI É EXATAMENTE IGUAL AO ARQUIVO DA FOTO
             const labels = ['Lazaroguylherme']; 
             
             const labeledFaceDescriptors = await Promise.all(
                 labels.map(async label => {
-                    const imgUrl = `./fotos/${label}.jpg`; 
+                    // CORREÇÃO: Apontando para a tela principal (.) e usando a extensão dupla (.jpg.jpg) exata do GitHub
+                    const imgUrl = `./${label}.jpg.jpg`; 
                     
                     try {
                         const img = await faceapi.fetchImage(imgUrl);
@@ -178,7 +179,7 @@
                         if (!detections) throw new Error(`Rosto não identificado na foto de ${label}. Troque por uma foto mais nítida.`);
                         return new faceapi.LabeledFaceDescriptors(label, [detections.descriptor]);
                     } catch (e) {
-                        throw new Error(`Não foi possível baixar o arquivo ./fotos/${label}.jpg. Verifique letras maiúsculas ou se é .png/.jpeg`);
+                        throw new Error(`Não foi possível baixar a foto exata. Falha no arquivo ${imgUrl}.`);
                     }
                 })
             );
