@@ -3,161 +3,281 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ponto Eletrônico - Reconhecimento Facial</title>
+    <title>Ponto Eletrônico - ebdi</title>
     
-    <script src="https://cdn.jsdelivr.net/gh/justadudewhohacks/face-api.js@master/dist/face-api.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+    
+    <script src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
     
     <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f0f2f5;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-            margin: 0;
+        /* Paleta de Cores Oficial EBDI */
+        :root {
+            --ebdi-dark: #161616;
+            --ebdi-blue: #003153;
+            --ebdi-lightblue: #1BA0CD;
+            --ebdi-cyan: #00E4FF;
+            --ebdi-gold: #D3B574;
+            --ebdi-white: #FFFFFF;
         }
-        .container {
-            background: white;
-            padding: 30px;
-            border-radius: 15px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-            text-align: center;
-            width: 90%;
-            max-width: 500px;
+
+        body { 
+            font-family: 'Montserrat', sans-serif; 
+            background-color: var(--ebdi-dark); 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: center; 
+            height: 100vh; 
+            margin: 0; 
+            color: var(--ebdi-white);
         }
-        h1 { color: #333; margin-bottom: 5px; }
-        .status {
-            color: #666;
-            margin-bottom: 20px;
-            font-weight: bold;
-        }
-        .video-container {
+
+        .container { 
+            background: var(--ebdi-blue); 
+            padding: 30px; 
+            border-radius: 15px; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5); 
+            text-align: center; 
+            width: 90%; 
+            max-width: 550px; 
+            border-top: 5px solid var(--ebdi-cyan);
             position: relative;
-            width: 100%;
-            max-width: 400px;
-            margin: 0 auto;
-            border-radius: 10px;
-            overflow: hidden;
+        }
+
+        h1 { 
+            color: var(--ebdi-white); 
+            margin-bottom: 5px; 
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
+
+        h1 span {
+            color: var(--ebdi-lightblue);
+        }
+
+        .status { 
+            color: var(--ebdi-gold); 
+            margin-bottom: 20px; 
+            font-weight: 600; 
+            font-size: 1.1rem;
+        }
+
+        .video-container { 
+            position: relative; 
+            width: 100%; 
+            max-width: 450px; 
+            margin: 0 auto; 
+            border-radius: 12px; 
+            overflow: hidden; 
             background: #000;
+            border: 3px solid var(--ebdi-lightblue);
         }
-        video {
-            width: 100%;
-            display: block;
+
+        video { width: 100%; display: block; transform: scaleX(-1); }
+        canvas { position: absolute; top: 0; left: 0; transform: scaleX(-1); }
+        
+        .log-container { 
+            margin-top: 25px; 
+            max-height: 150px; 
+            overflow-y: auto; 
+            border-top: 1px solid rgba(255, 255, 255, 0.1); 
+            padding-top: 15px; 
+            text-align: left; 
+            font-size: 14px; 
         }
-        canvas {
+
+        .log-item { 
+            padding: 8px 0; 
+            border-bottom: 1px dashed rgba(255, 255, 255, 0.1); 
+        }
+
+        .entrada { color: #4ade80; } /* Verde claro para leitura no fundo escuro */
+        .saida { color: #facc15; } /* Amarelo para leitura no fundo escuro */
+
+        /* A FAIXA VERDE DE RECONHECIMENTO */
+        .success-banner {
             position: absolute;
-            top: 0;
-            left: 0;
+            top: -20px; /* Começa escondida para cima */
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #15803d; /* Verde sucesso */
+            color: white;
+            padding: 15px 30px;
+            border-radius: 10px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.4);
+            text-align: center;
+            font-size: 1.1rem;
+            font-weight: 600;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            z-index: 100;
+            width: 85%;
+            border: 2px solid #22c55e;
         }
-        .log-container {
-            margin-top: 20px;
-            max-height: 150px;
-            overflow-y: auto;
-            border-top: 1px solid #eee;
-            padding-top: 10px;
-            text-align: left;
-            font-size: 14px;
+
+        /* Classe ativada pelo JavaScript para mostrar a faixa */
+        .success-banner.show {
+            top: 30px;
+            opacity: 1;
+            visibility: visible;
         }
-        .log-item {
-            padding: 5px 0;
-            border-bottom: 1px dashed #f0f0f0;
-        }
+
+        .success-banner .b-nome { font-size: 1.4rem; font-weight: 700; margin: 5px 0; display: block; }
+        .success-banner .b-data { font-size: 0.9rem; font-weight: 400; opacity: 0.9; }
+
     </style>
 </head>
 <body>
 
+<div id="successBanner" class="success-banner">
+    <span id="bannerTipo">✅ Entrada Registrada!</span>
+    <span class="b-nome" id="bannerNome">Nome do Colaborador</span>
+    <span class="b-data" id="bannerData">00/00/0000 às 00:00:00</span>
+</div>
+
 <div class="container">
-    <h1>Ponto Facial</h1>
+    <h1>Ponto <span>ebdi</span></h1>
     <div class="status" id="statusLabel">Carregando inteligência artificial...</div>
-    
     <div class="video-container">
         <video id="video" autoplay muted playsinline></video>
     </div>
-
     <div class="log-container" id="logContainer">
-        <strong>Últimos Registros (Simulado):</strong>
+        <strong>Últimos Registros da Unidade:</strong>
     </div>
 </div>
 
 <script>
-    window.onload = function() {
+    window.onload = async function() {
         const video = document.getElementById('video');
         const statusLabel = document.getElementById('statusLabel');
         const logContainer = document.getElementById('logContainer');
+        const successBanner = document.getElementById('successBanner');
 
-        // Link dos modelos (cérebro da IA)
-        const modelUrl = 'https://cdn.jsdelivr.net/gh/justadudewhohacks/face-api.js@master/weights';
+        const modelUrl = 'https://justadudewhohacks.github.io/face-api.js/models';
 
-        Promise.all([
-            faceapi.nets.tinyFaceDetector.loadFromUri(modelUrl),
-            faceapi.nets.faceLandmark68Net.loadFromUri(modelUrl),
-            faceapi.nets.faceRecognitionNet.loadFromUri(modelUrl),
-            faceapi.nets.ssdMobilenetv1.loadFromUri(modelUrl)
-        ]).then(startVideo).catch(err => {
-            statusLabel.innerText = "Erro ao baixar IA. Veja o console (F12).";
-            statusLabel.style.color = "red";
-            console.error("Erro detalhado:", err);
-        });
+        try {
+            await Promise.all([
+                faceapi.nets.tinyFaceDetector.loadFromUri(modelUrl),
+                faceapi.nets.faceLandmark68Net.loadFromUri(modelUrl),
+                faceapi.nets.faceRecognitionNet.loadFromUri(modelUrl),
+                faceapi.nets.ssdMobilenetv1.loadFromUri(modelUrl)
+            ]);
+            statusLabel.innerText = "Treinando rostos cadastrados...";
+            
+            // LISTA DE FUNCIONÁRIOS (Lembre-se de manter igual ao nome da foto)
+            const labels = ['Lazaroguylherme']; 
+            
+            const labeledFaceDescriptors = await Promise.all(
+                labels.map(async label => {
+                    const imgUrl = `./fotos/${label}.jpg`; 
+                    const img = await faceapi.fetchImage(imgUrl);
+                    const detections = await faceapi.detectSingleFace(img).withFaceLandmarks().withFaceDescriptor();
+                    
+                    if (!detections) throw new Error(`Não achei um rosto claro na foto de ${label}`);
+                    return new faceapi.LabeledFaceDescriptors(label, [detections.descriptor]);
+                })
+            );
 
-        function startVideo() {
+            const faceMatcher = new faceapi.FaceMatcher(labeledFaceDescriptors, 0.6);
+            startVideo(faceMatcher);
+
+        } catch (err) {
+            statusLabel.innerText = "Erro ao carregar fotos. Verifique os nomes no código.";
+            statusLabel.style.color = "#ef4444";
+            console.error(err);
+        }
+
+        function startVideo(faceMatcher) {
             statusLabel.innerText = "Ligando a câmera...";
+            statusLabel.style.color = "var(--ebdi-gold)";
+            
             navigator.mediaDevices.getUserMedia({ video: {} })
                 .then(stream => {
                     video.srcObject = stream;
                     statusLabel.innerText = "Posicione o rosto em frente ao tablet";
+                    statusLabel.style.color = "var(--ebdi-cyan)";
                 })
                 .catch(err => {
-                    statusLabel.innerText = "Permita o uso da câmera no navegador!";
-                    statusLabel.style.color = "red";
-                    console.error("Erro de câmera:", err);
+                    statusLabel.innerText = "Permita a câmera no navegador!";
+                    statusLabel.style.color = "#ef4444";
                 });
-        }
 
-        video.addEventListener('play', async () => {
-            const canvas = faceapi.createCanvasFromMedia(video);
-            document.querySelector('.video-container').append(canvas);
-            const displaySize = { width: video.clientWidth, height: video.clientHeight };
-            faceapi.matchDimensions(canvas, displaySize);
+            let pondoEmEspera = false;
 
-            let ultimoRegistro = 0;
+            video.addEventListener('play', () => {
+                const canvas = faceapi.createCanvasFromMedia(video);
+                document.querySelector('.video-container').append(canvas);
+                const displaySize = { width: video.clientWidth, height: video.clientHeight };
+                faceapi.matchDimensions(canvas, displaySize);
 
-            setInterval(async () => {
-                const detections = await faceapi.detectAllFaces(video, new faceapi.TinyFaceDetectorOptions()).withFaceLandmarks().withFaceDescriptors();
-                const resizedDetections = faceapi.resizeResults(detections, displaySize);
-                canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
-                faceapi.draw.drawDetections(canvas, resizedDetections);
+                setInterval(async () => {
+                    if (pondoEmEspera) return; 
 
-                if (detections.length > 0) {
-                    const agora = new Date().getTime();
-                    if (agora - ultimoRegistro > 5000) { 
-                        registrarPonto("Rosto Detectado");
-                        ultimoRegistro = agora;
+                    const detections = await faceapi.detectAllFaces(video, new faceapi.TinyFaceDetectorOptions()).withFaceLandmarks().withFaceDescriptors();
+                    const resizedDetections = faceapi.resizeResults(detections, displaySize);
+                    
+                    canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
+                    faceapi.draw.drawDetections(canvas, resizedDetections);
+
+                    if (detections.length > 0) {
+                        const results = resizedDetections.map(d => faceMatcher.findBestMatch(d.descriptor));
+                        
+                        results.forEach((result) => {
+                            const nomeReconhecido = result.label;
+                            
+                            if (nomeReconhecido !== 'unknown') {
+                                registrarPonto(nomeReconhecido);
+                                pondoEmEspera = true;
+                                setTimeout(() => { pondoEmEspera = false; }, 8000); // 8s de pausa
+                            }
+                        });
                     }
-                }
-            }, 1000);
-        });
+                }, 1000);
+            });
+        }
 
         function registrarPonto(nome) {
             const agora = new Date();
+            const dataHoje = agora.toLocaleDateString('pt-BR'); 
             const horaFormatada = agora.toLocaleTimeString('pt-BR');
             
-            statusLabel.innerText = `Ponto batido: ${nome}!`;
-            statusLabel.style.color = "green";
+            const chaveRegistro = `ponto_${nome}_${dataHoje}`;
+            const registroHoje = localStorage.getItem(chaveRegistro);
+            let tipoPonto = "";
+
+            if (!registroHoje) {
+                tipoPonto = "Entrada";
+                localStorage.setItem(chaveRegistro, 'entrada_registrada'); 
+            } else {
+                tipoPonto = "Saída";
+            }
             
+            // PREENCHE E MOSTRA A FAIXA VERDE
+            document.getElementById('bannerTipo').innerHTML = tipoPonto === "Entrada" ? "✅ Entrada Registrada!" : "👋 Saída Registrada!";
+            document.getElementById('bannerNome').innerText = nome;
+            document.getElementById('bannerData').innerText = `${dataHoje} às ${horaFormatada}`;
+            
+            const banner = document.getElementById('successBanner');
+            banner.classList.add('show');
+            statusLabel.style.opacity = '0'; // Esconde o texto base pra não poluir
+
+            // Adiciona no log visual inferior
             const item = document.createElement('div');
             item.classList.add('log-item');
-            item.innerHTML = `✅ <strong>${nome}</strong> - ${horaFormatada}`;
+            const classeCor = tipoPonto === "Entrada" ? "entrada" : "saida";
+            item.innerHTML = `<span class="${classeCor}"><strong>[${tipoPonto}] ${nome}</strong> - ${horaFormatada}</span>`;
             logContainer.insertBefore(item, logContainer.firstChild);
 
+            // Esconde a faixa após 4.5 segundos
             setTimeout(() => {
-                statusLabel.innerText = "Posicione o rosto em frente ao tablet";
-                statusLabel.style.color = "#666";
-            }, 3000);
+                banner.classList.remove('show');
+                statusLabel.style.opacity = '1';
+            }, 4500);
         }
     };
 </script>
-
 </body>
 </html>
