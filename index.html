@@ -12,9 +12,7 @@
     <script src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
     
     <style>
-        /* Paleta de Cores Oficial EBDI */
         :root {
-            --ebdi-dark: #161616;
             --ebdi-blue: #003153;
             --ebdi-lightblue: #1BA0CD;
             --ebdi-cyan: #00E4FF;
@@ -24,7 +22,7 @@
 
         body { 
             font-family: 'Montserrat', sans-serif; 
-            background-color: var(--ebdi-dark); 
+            background-color: var(--ebdi-blue); /* Fundo todo azul oficial */
             display: flex; 
             flex-direction: column; 
             align-items: center; 
@@ -35,78 +33,76 @@
         }
 
         .container { 
-            background: var(--ebdi-blue); 
-            padding: 30px; 
-            border-radius: 15px; 
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5); 
+            background: rgba(0, 0, 0, 0.25); /* Fundo sutil escurecido para destacar do azul */
+            padding: 40px 30px; 
+            border-radius: 20px; 
+            box-shadow: 0 15px 35px rgba(0,0,0,0.3); 
             text-align: center; 
-            width: 90%; 
-            max-width: 550px; 
+            width: 95%; 
+            max-width: 800px; /* Contêiner mais largo */
             border-top: 5px solid var(--ebdi-cyan);
+            border-bottom: 1px solid rgba(255,255,255,0.1);
             position: relative;
         }
 
-        h1 { 
-            color: var(--ebdi-white); 
-            margin-bottom: 5px; 
-            font-weight: 700;
-            letter-spacing: 1px;
-        }
-
-        h1 span {
-            color: var(--ebdi-lightblue);
+        .logo-ebdi {
+            max-width: 200px; /* Tamanho da logo */
+            margin-bottom: 20px;
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
         }
 
         .status { 
             color: var(--ebdi-gold); 
-            margin-bottom: 20px; 
+            margin-bottom: 25px; 
             font-weight: 600; 
-            font-size: 1.1rem;
+            font-size: 1.2rem;
         }
 
         .video-container { 
             position: relative; 
             width: 100%; 
-            max-width: 450px; 
+            max-width: 650px; /* Câmera muito maior */
             margin: 0 auto; 
-            border-radius: 12px; 
+            border-radius: 15px; 
             overflow: hidden; 
             background: #000;
-            border: 3px solid var(--ebdi-lightblue);
+            border: 4px solid var(--ebdi-lightblue);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.4);
         }
 
         video { width: 100%; display: block; transform: scaleX(-1); }
         canvas { position: absolute; top: 0; left: 0; transform: scaleX(-1); }
         
         .log-container { 
-            margin-top: 25px; 
-            max-height: 150px; 
+            margin-top: 30px; 
+            max-height: 180px; 
             overflow-y: auto; 
             border-top: 1px solid rgba(255, 255, 255, 0.1); 
             padding-top: 15px; 
             text-align: left; 
-            font-size: 14px; 
+            font-size: 15px; 
         }
 
         .log-item { 
-            padding: 8px 0; 
+            padding: 10px 0; 
             border-bottom: 1px dashed rgba(255, 255, 255, 0.1); 
         }
 
-        .entrada { color: #4ade80; } /* Verde claro para leitura no fundo escuro */
-        .saida { color: #facc15; } /* Amarelo para leitura no fundo escuro */
+        .entrada { color: #4ade80; } 
+        .saida { color: #facc15; } 
 
-        /* A FAIXA VERDE DE RECONHECIMENTO */
         .success-banner {
             position: absolute;
-            top: -20px; /* Começa escondida para cima */
+            top: -20px; 
             left: 50%;
             transform: translateX(-50%);
-            background-color: #15803d; /* Verde sucesso */
+            background-color: #15803d; 
             color: white;
             padding: 15px 30px;
             border-radius: 10px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.4);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
             text-align: center;
             font-size: 1.1rem;
             font-weight: 600;
@@ -118,15 +114,14 @@
             border: 2px solid #22c55e;
         }
 
-        /* Classe ativada pelo JavaScript para mostrar a faixa */
         .success-banner.show {
-            top: 30px;
+            top: 40px;
             opacity: 1;
             visibility: visible;
         }
 
-        .success-banner .b-nome { font-size: 1.4rem; font-weight: 700; margin: 5px 0; display: block; }
-        .success-banner .b-data { font-size: 0.9rem; font-weight: 400; opacity: 0.9; }
+        .success-banner .b-nome { font-size: 1.5rem; font-weight: 700; margin: 5px 0; display: block; }
+        .success-banner .b-data { font-size: 0.95rem; font-weight: 400; opacity: 0.9; }
 
     </style>
 </head>
@@ -134,16 +129,19 @@
 
 <div id="successBanner" class="success-banner">
     <span id="bannerTipo">✅ Entrada Registrada!</span>
-    <span class="b-nome" id="bannerNome">Nome do Colaborador</span>
+    <span class="b-nome" id="bannerNome">Nome</span>
     <span class="b-data" id="bannerData">00/00/0000 às 00:00:00</span>
 </div>
 
 <div class="container">
-    <h1>Ponto <span>ebdi</span></h1>
+    <img src="./logo.png" alt="Logo EBDI" class="logo-ebdi" onerror="this.style.display='none'">
+    
     <div class="status" id="statusLabel">Carregando inteligência artificial...</div>
+    
     <div class="video-container">
         <video id="video" autoplay muted playsinline></video>
     </div>
+    
     <div class="log-container" id="logContainer">
         <strong>Últimos Registros da Unidade:</strong>
     </div>
@@ -165,19 +163,23 @@
                 faceapi.nets.faceRecognitionNet.loadFromUri(modelUrl),
                 faceapi.nets.ssdMobilenetv1.loadFromUri(modelUrl)
             ]);
-            statusLabel.innerText = "Treinando rostos cadastrados...";
+            statusLabel.innerText = "Sincronizando fotos dos colaboradores...";
             
-            // LISTA DE FUNCIONÁRIOS (Lembre-se de manter igual ao nome da foto)
+            // VERIFIQUE SE O NOME AQUI É EXATAMENTE IGUAL AO ARQUIVO DA FOTO
             const labels = ['Lazaroguylherme']; 
             
             const labeledFaceDescriptors = await Promise.all(
                 labels.map(async label => {
                     const imgUrl = `./fotos/${label}.jpg`; 
-                    const img = await faceapi.fetchImage(imgUrl);
-                    const detections = await faceapi.detectSingleFace(img).withFaceLandmarks().withFaceDescriptor();
                     
-                    if (!detections) throw new Error(`Não achei um rosto claro na foto de ${label}`);
-                    return new faceapi.LabeledFaceDescriptors(label, [detections.descriptor]);
+                    try {
+                        const img = await faceapi.fetchImage(imgUrl);
+                        const detections = await faceapi.detectSingleFace(img).withFaceLandmarks().withFaceDescriptor();
+                        if (!detections) throw new Error(`Rosto não identificado na foto de ${label}. Troque por uma foto mais nítida.`);
+                        return new faceapi.LabeledFaceDescriptors(label, [detections.descriptor]);
+                    } catch (e) {
+                        throw new Error(`Não foi possível baixar o arquivo ./fotos/${label}.jpg. Verifique letras maiúsculas ou se é .png/.jpeg`);
+                    }
                 })
             );
 
@@ -185,7 +187,7 @@
             startVideo(faceMatcher);
 
         } catch (err) {
-            statusLabel.innerText = "Erro ao carregar fotos. Verifique os nomes no código.";
+            statusLabel.innerText = err.message;
             statusLabel.style.color = "#ef4444";
             console.error(err);
         }
@@ -231,7 +233,7 @@
                             if (nomeReconhecido !== 'unknown') {
                                 registrarPonto(nomeReconhecido);
                                 pondoEmEspera = true;
-                                setTimeout(() => { pondoEmEspera = false; }, 8000); // 8s de pausa
+                                setTimeout(() => { pondoEmEspera = false; }, 8000); 
                             }
                         });
                     }
@@ -255,23 +257,20 @@
                 tipoPonto = "Saída";
             }
             
-            // PREENCHE E MOSTRA A FAIXA VERDE
             document.getElementById('bannerTipo').innerHTML = tipoPonto === "Entrada" ? "✅ Entrada Registrada!" : "👋 Saída Registrada!";
             document.getElementById('bannerNome').innerText = nome;
             document.getElementById('bannerData').innerText = `${dataHoje} às ${horaFormatada}`;
             
             const banner = document.getElementById('successBanner');
             banner.classList.add('show');
-            statusLabel.style.opacity = '0'; // Esconde o texto base pra não poluir
+            statusLabel.style.opacity = '0'; 
 
-            // Adiciona no log visual inferior
             const item = document.createElement('div');
             item.classList.add('log-item');
             const classeCor = tipoPonto === "Entrada" ? "entrada" : "saida";
             item.innerHTML = `<span class="${classeCor}"><strong>[${tipoPonto}] ${nome}</strong> - ${horaFormatada}</span>`;
             logContainer.insertBefore(item, logContainer.firstChild);
 
-            // Esconde a faixa após 4.5 segundos
             setTimeout(() => {
                 banner.classList.remove('show');
                 statusLabel.style.opacity = '1';
