@@ -229,7 +229,14 @@
             statusLabel.innerText = "Sincronizando banco facial...";
             
             // Configuração da foto de teste
-            const labels = ['lazaroguylherme']; 
+            const labels = [
+                'lazaroguylherme',
+                'azeite',
+                'clebersilva',
+                'kaiquelima',
+                'tiagosimoes',
+                'vitorialela'
+            ];
             
             const labeledFaceDescriptors = await Promise.all(
                 labels.map(async label => {
@@ -324,6 +331,11 @@
             
             let nomeExibicao = nome;
             if (nome === 'lazaroguylherme') nomeExibicao = 'Lázaro Guylherme';
+            if (nome === 'azeite') nomeExibicao = 'Azeite';
+            if (nome === 'clebersilva') nomeExibicao = 'Cleber Silva';
+            if (nome === 'kaiquelima') nomeExibicao = 'Kaique Lima';
+            if (nome === 'tiagosimoes') nomeExibicao = 'Tiago Simões';
+            if (nome === 'vitorialela') nomeExibicao = 'Vitória Lela';
             
             document.getElementById('bannerNome').innerText = nomeExibicao;
             document.getElementById('bannerData').innerText = `${dataHoje} às ${horaFormatada}`;
