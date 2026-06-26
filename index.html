@@ -60,11 +60,10 @@
             font-size: 1.2rem;
         }
 
-        /* AJUSTE PARA CÂMERA MAIS QUADRADA */
         .video-container { 
             position: relative; 
             width: 100%; 
-            max-width: 480px; /* Reduzido de 650px para dar formato quadrado */
+            max-width: 480px; 
             margin: 0 auto; 
             border-radius: 15px; 
             overflow: hidden; 
@@ -166,12 +165,13 @@
             ]);
             statusLabel.innerText = "Sincronizando fotos dos colaboradores...";
             
+            // Seu nome exatamente como está no arquivo (tudo minúsculo)
             const labels = ['lazaroguylherme']; 
             
             const labeledFaceDescriptors = await Promise.all(
                 labels.map(async label => {
-                    // CORREÇÃO: Apontando para a tela principal (.) e usando a extensão dupla (.jpg.jpg) exata do GitHub
-                    const imgUrl = `./${label}.jpg.jpg`; 
+                    // CORREÇÃO: Agora puxando o arquivo com apenas UM .jpg
+                    const imgUrl = `./${label}.jpg`; 
                     
                     try {
                         const img = await faceapi.fetchImage(imgUrl);
@@ -259,7 +259,12 @@
             }
             
             document.getElementById('bannerTipo').innerHTML = tipoPonto === "Entrada" ? "✅ Entrada Registrada!" : "👋 Saída Registrada!";
-            document.getElementById('bannerNome').innerText = nome;
+            
+            // Formatando o nome para aparecer bonitinho na tela (ex: Lázaro Guylherme em vez de lazaroguylherme)
+            let nomeExibicao = nome;
+            if (nome === 'lazaroguylherme') nomeExibicao = 'Lázaro Guylherme';
+            
+            document.getElementById('bannerNome').innerText = nomeExibicao;
             document.getElementById('bannerData').innerText = `${dataHoje} às ${horaFormatada}`;
             
             const banner = document.getElementById('successBanner');
@@ -269,7 +274,7 @@
             const item = document.createElement('div');
             item.classList.add('log-item');
             const classeCor = tipoPonto === "Entrada" ? "entrada" : "saida";
-            item.innerHTML = `<span class="${classeCor}"><strong>[${tipoPonto}] ${nome}</strong> - ${horaFormatada}</span>`;
+            item.innerHTML = `<span class="${classeCor}"><strong>[${tipoPonto}] ${nomeExibicao}</strong> - ${horaFormatada}</span>`;
             logContainer.insertBefore(item, logContainer.firstChild);
 
             setTimeout(() => {
